@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fight Reward Logger
 // @namespace    http://tampermonkey.net/
-// @version      0.2.5
+// @version      0.2.8
 // @description
 // @author       You
 // @match        http://www.carnageblender.com/fight.tcl*
@@ -84,10 +84,24 @@
   }
 
   //window.addEventListener('load', function() {
+
   const params = new Proxy(new URLSearchParams(window.location.search), {
     get: (searchParams, prop) => searchParams.get(prop),
   });
-  const opponentId = params.opponent_id;
+
+  const idFromLink = document
+    .querySelector(
+      "body > table:nth-child(4) > tbody > tr > td > table:nth-child(1) > tbody > tr.header-font > td > a:nth-child(1)"
+    )
+    ?.getAttribute("href")
+    ?.match(/(\d+)$/)[0];
+
+  const opponentId = params.opponent_id || idFromLink;
+
+  if (!opponentId) {
+    console.log("This is not running on the right page!");
+    return;
+  }
 
   const cashReward = window.document.querySelector(
     "body > table:nth-child(4) > tbody > tr > td > table:nth-child(1) > tbody > tr:nth-child(3) > td > table > tbody > tr > td:nth-child(1) > table > tbody > tr:nth-child(2) > td:nth-child(2)"
