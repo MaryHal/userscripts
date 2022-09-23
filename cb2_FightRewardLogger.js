@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fight Reward Logger
 // @namespace    http://tampermonkey.net/
-// @version      0.2.8
+// @version      0.2.10
 // @description
 // @author       You
 // @match        http://www.carnageblender.com/fight.tcl*
@@ -81,6 +81,23 @@
       false
     );
     elementToAddTo.prepend(resetButton);
+
+    const resetAllButton = window.document.createElement("button");
+    resetAllButton.innerText = "Reset All";
+    resetAllButton.addEventListener(
+      "click",
+      function () {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key.startsWith("rewards-")) {
+            localStorage.removeItem(key);
+            i--;
+          }
+        }
+      },
+      false
+    );
+    elementToAddTo.prepend(resetAllButton);
   }
 
   //window.addEventListener('load', function() {
