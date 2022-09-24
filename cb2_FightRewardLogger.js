@@ -96,8 +96,6 @@
     elementToAddTo.prepend(resetAllButton);
   }
 
-  //window.addEventListener('load', function() {
-
   const params = new Proxy(new URLSearchParams(window.location.search), {
     get: (searchParams, prop) => searchParams.get(prop),
   });
@@ -150,6 +148,4 @@
   }
 
   showData(body, rewardData);
-
-  //}, false);
 })();
