@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fight Reward Logger
 // @namespace    http://tampermonkey.net/
-// @version      0.2.10
+// @version      0.3.4
 // @description
 // @author       You
 // @match        http://www.carnageblender.com/fight.tcl*
@@ -11,63 +11,59 @@
 (function () {
   "use strict";
 
-  const REWARD_LOG_DELMITER = ",";
-  const RewardType = {
-    CASH: "cash",
-    EXP: "exp",
-  };
-
-  function rewardKey(opponentId, rewardType) {
-    return `rewards-${opponentId}-${rewardType}`;
+  function rewardKey(opponentId) {
+    return `rewards-${opponentId}`;
   }
 
   function cleanNumber(n) {
-    return Number(n.replace("$", "").replace(",", ""));
+    return Number(n.replaceAll("$", "").replaceAll(",", ""));
   }
 
-  function loadRewardData(opponentId, rewardType) {
-    const rewardData = localStorage.getItem(rewardKey(opponentId, rewardType));
+  function loadRewardData(opponentId) {
+    const rewardData = localStorage.getItem(rewardKey(opponentId));
     if (rewardData) {
-      return rewardData.split(REWARD_LOG_DELMITER).map((d) => Number(d));
+      return JSON.parse(rewardData);
     }
 
-    return [];
+    return {
+      exp: [],
+      cash: [],
+      lastCash: null,
+    };
   }
 
-  function saveRewardData(opponentId, rewardType, dataArray) {
-    if (!dataArray) {
-      dataArray = [];
-    }
-
-    localStorage.setItem(
-      rewardKey(opponentId, rewardType),
-      dataArray.join(REWARD_LOG_DELMITER)
-    );
+  function saveRewardData(opponentId, data = {}) {
+    localStorage.setItem(rewardKey(opponentId), JSON.stringify(data));
   }
 
-  function showData(elementToAddTo, expData, cashData) {
-    const expAverage = expData.reduce((v, acc) => v + acc, 0) / expData.length;
+  function removeRewardData(opponentId) {
+    localStorage.removeItem(rewardKey(opponentId));
+  }
+
+  function showData(elementToAddTo, data) {
+    const expAverage =
+      data.exp.reduce((v, acc) => v + acc, 0) / data.exp.length;
     const cashAverage =
-      cashData.reduce((v, acc) => v + acc, 0) / cashData.length;
+      data.cash.reduce((v, acc) => v + acc, 0) / data.cash.length;
 
     const cashDataElement = window.document.createElement("input");
     cashDataElement.setAttribute("readonly", "true");
     cashDataElement.style.width = "100%";
-    cashDataElement.value = cashData.join(" ");
+    cashDataElement.value = data.cash.join(" ");
     elementToAddTo.prepend(cashDataElement);
 
     const averageCashElement = window.document.createElement("p");
-    averageCashElement.innerText = `Average $CB (${cashData.length}): ${cashAverage}`;
+    averageCashElement.innerText = `Average $CB (${data.cash.length}): ${cashAverage}`;
     elementToAddTo.prepend(averageCashElement);
 
     const expDataElement = window.document.createElement("input");
     expDataElement.setAttribute("readonly", "true");
     expDataElement.style.width = "100%";
-    expDataElement.value = expData.join(" ");
+    expDataElement.value = data.exp.join(" ");
     elementToAddTo.prepend(expDataElement);
 
     const averageExpElement = window.document.createElement("p");
-    averageExpElement.innerText = `Average EXP (${expData.length}): ${expAverage}`;
+    averageExpElement.innerText = `Average EXP (${data.exp.length}): ${expAverage}`;
     elementToAddTo.prepend(averageExpElement);
 
     const resetButton = window.document.createElement("button");
@@ -75,8 +71,8 @@
     resetButton.addEventListener(
       "click",
       function () {
-        saveRewardData(opponentId, RewardType.EXP, []);
-        saveRewardData(opponentId, RewardType.CASH, []);
+        removeRewardData(opponentId);
+        removeRewardData(opponentId);
       },
       false
     );
@@ -126,21 +122,34 @@
   const expReward = window.document.querySelector(
     "body > table:nth-child(4) > tbody > tr > td > table:nth-child(1) > tbody > tr:nth-child(3) > td > table > tbody > tr > td:nth-child(1) > table > tbody > tr:nth-child(4) > td:nth-child(2)"
   );
+  const currentCash = window.document
+    .querySelector(
+      "body > table:nth-child(4) > tbody > tr > td > table:nth-child(1) > tbody > tr:nth-child(3) > td"
+    )
+    ?.innerText?.match(/You have \$([\d,]+)./)?.[1];
 
-  const expData = loadRewardData(opponentId, RewardType.EXP);
-  const cashData = loadRewardData(opponentId, RewardType.CASH);
+  const rewardData = loadRewardData(opponentId);
 
   const body = window.document.getElementsByTagName("body")[0];
 
-  if (cashReward && expReward) {
-    expData.push(cleanNumber(expReward.innerText));
-    cashData.push(cleanNumber(cashReward.innerText));
+  if (cashReward && expReward && currentCash) {
+    console.log(currentCash);
+    const currentCashNumber = cleanNumber(currentCash);
 
-    saveRewardData(opponentId, RewardType.EXP, expData);
-    saveRewardData(opponentId, RewardType.CASH, cashData);
+    if (
+      rewardData.lastCash == null ||
+      currentCashNumber > rewardData.lastCash
+    ) {
+      rewardData.exp.push(cleanNumber(expReward.innerText));
+      rewardData.cash.push(cleanNumber(cashReward.innerText));
+
+      rewardData.lastCash = currentCashNumber;
+
+      saveRewardData(opponentId, rewardData);
+    }
   }
 
-  showData(body, expData, cashData);
+  showData(body, rewardData);
 
   //}, false);
 })();
