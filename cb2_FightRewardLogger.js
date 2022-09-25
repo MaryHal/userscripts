@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fight Reward Logger
 // @namespace    http://tampermonkey.net/
-// @version      0.3.4
+// @version      0.3.5
 // @description
 // @author       You
 // @match        http://www.carnageblender.com/fight.tcl*
@@ -110,7 +110,7 @@
   const opponentId = params.opponent_id || idFromLink;
 
   if (!opponentId) {
-    console.log("This is not running on the right page!");
+    console.debug("Not running on the fight page.");
     return;
   }
 
@@ -131,7 +131,6 @@
   const body = window.document.getElementsByTagName("body")[0];
 
   if (cashReward && expReward && currentCash) {
-    console.log(currentCash);
     const currentCashNumber = cleanNumber(currentCash);
 
     if (
