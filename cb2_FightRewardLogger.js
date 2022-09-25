@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fight Reward Logger
 // @namespace    http://tampermonkey.net/
-// @version      0.3.5
+// @version      0.3.6
 // @description
 // @author       You
 // @match        http://www.carnageblender.com/fight.tcl*
@@ -40,11 +40,19 @@
     localStorage.removeItem(rewardKey(opponentId));
   }
 
+  function getRewardsStats(dataArray) {
+    const average = dataArray.reduce((v, acc) => v + acc, 0) / dataArray.length;
+    return {
+      count: dataArray.length,
+      average,
+      min: Math.min(dataArray),
+      max: Math.max(dataArray),
+    };
+  }
+
   function showData(elementToAddTo, data) {
-    const expAverage =
-      data.exp.reduce((v, acc) => v + acc, 0) / data.exp.length;
-    const cashAverage =
-      data.cash.reduce((v, acc) => v + acc, 0) / data.cash.length;
+    const expData = getRewardsStats(data.exp);
+    const cashData = getRewardsStats(data.cash);
 
     const cashDataElement = window.document.createElement("input");
     cashDataElement.setAttribute("readonly", "true");
@@ -52,9 +60,9 @@
     cashDataElement.value = data.cash.join(" ");
     elementToAddTo.prepend(cashDataElement);
 
-    const averageCashElement = window.document.createElement("p");
-    averageCashElement.innerText = `Average $CB (${data.cash.length}): ${cashAverage}`;
-    elementToAddTo.prepend(averageCashElement);
+    const cashStatsElement = window.document.createElement("p");
+    cashStatsElement.innerText = `$CB (${cashData.count}): Average ${cashData.average}, Min ${cashData.min}, Max ${cashData.max}`;
+    elementToAddTo.prepend(cashStatsElement);
 
     const expDataElement = window.document.createElement("input");
     expDataElement.setAttribute("readonly", "true");
@@ -62,9 +70,9 @@
     expDataElement.value = data.exp.join(" ");
     elementToAddTo.prepend(expDataElement);
 
-    const averageExpElement = window.document.createElement("p");
-    averageExpElement.innerText = `Average EXP (${data.exp.length}): ${expAverage}`;
-    elementToAddTo.prepend(averageExpElement);
+    const expStatsElement = window.document.createElement("p");
+    expStatsElement.innerText = `EXP (${expData.count}): Average ${expData.average}, Min ${expData.min}, Max ${expData.max}`;
+    elementToAddTo.prepend(expStatsElement);
 
     const resetButton = window.document.createElement("button");
     resetButton.innerText = "Reset";
