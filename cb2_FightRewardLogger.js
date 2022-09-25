@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fight Reward Logger
 // @namespace    http://tampermonkey.net/
-// @version      0.3.6
+// @version      0.3.7
 // @description
 // @author       You
 // @match        http://www.carnageblender.com/fight.tcl*
@@ -47,8 +47,8 @@
     return {
       count: dataArray.length,
       average,
-      min: Math.min(dataArray),
-      max: Math.max(dataArray),
+      min: Math.min(...dataArray),
+      max: Math.max(...dataArray),
     };
   }
 
