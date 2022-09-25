@@ -6,6 +6,8 @@
 // @author       You
 // @match        http://www.carnageblender.com/fight.tcl*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=carnageblender.com
+// @downloadURL  https://github.com/MaryHal/userscripts/raw/master/cb2_FightRewardLogger.js
+// @updateURL    https://github.com/MaryHal/userscripts/raw/master/cb2_FightRewardLogger.js
 // ==/UserScript==
 
 (function () {
