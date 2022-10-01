@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      0.3.7
 // @description
-// @author       You
+// @author       MHL
 // @match        http://www.carnageblender.com/fight.tcl*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=carnageblender.com
 // @downloadURL  https://github.com/MaryHal/userscripts/raw/master/cb2_FightRewardLogger.js
