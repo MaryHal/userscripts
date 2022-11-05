@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fight Reward Logger
 // @namespace    http://tampermonkey.net/
-// @version      0.3.7
+// @version      0.3.8
 // @description
 // @author       MHL
 // @match        http://www.carnageblender.com/fight.tcl*
@@ -93,12 +93,11 @@
     resetAllButton.addEventListener(
       "click",
       function () {
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key.startsWith("rewards-")) {
-            localStorage.removeItem(key);
-            i--;
-          }
+        const matchingRewardsKeys = Object.keys(localStorage).filter((k) =>
+          k.startsWith("rewards-")
+        );
+        for (const key of matchingRewardsKeys) {
+          localStorage.removeItem(key);
         }
       },
       false
